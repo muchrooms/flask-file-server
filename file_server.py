@@ -12,7 +12,7 @@ import mimetypes
 app = Flask(__name__, static_url_path='/assets', static_folder='assets')
 root = os.path.expanduser('~')
 
-ignored = ['.bzr', '$RECYCLE.BIN', '.DAV', '.DS_Store', '.git', '.hg', '.htaccess', '.htpasswd', '.Spotlight-V100', '.svn', '__MACOSX', 'ehthumbs.db', 'robots.txt', 'Thumbs.db', 'thumbs.tps']
+#ignored = ['.bzr', '$RECYCLE.BIN', '.DAV', '.DS_Store', '.git', '.hg', '.htaccess', '.htpasswd', '.Spotlight-V100', '.svn', '__MACOSX', 'ehthumbs.db', 'robots.txt', 'Thumbs.db', 'thumbs.tps']
 datatypes = {'audio': 'm4a,mp3,oga,ogg,webma,wav', 'archive': '7z,zip,rar,gz,tar', 'image': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'pdf': 'pdf', 'quicktime': '3g2,3gp,3gp2,3gpp,mov,qt', 'source': 'atom,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml,plist', 'text': 'txt', 'video': 'mp4,m4v,ogv,webm', 'website': 'htm,html,mhtm,mhtml,xhtm,xhtml'}
 icontypes = {'fa-music': 'm4a,mp3,oga,ogg,webma,wav', 'fa-archive': '7z,zip,rar,gz,tar', 'fa-picture-o': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'fa-file-text': 'pdf', 'fa-film': '3g2,3gp,3gp2,3gpp,mov,qt', 'fa-code': 'atom,plist,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml', 'fa-file-text-o': 'txt', 'fa-film': 'mp4,m4v,ogv,webm', 'fa-globe': 'htm,html,mhtm,mhtml,xhtm,xhtml'}
 
@@ -32,6 +32,7 @@ def data_fmt(filename):
     for type, exts in datatypes.items():
         if filename.split('.')[-1] in exts:
             t = type
+            break
     return t
 
 @app.template_filter('icon_fmt')
@@ -134,8 +135,8 @@ class PathView(MethodView):
             contents = []
             total = {'size': 0, 'dir': 0, 'file': 0}
             for filename in os.listdir(path):
-                if filename in ignored:
-                    continue
+                #if filename in ignored:
+                #    continue
                 if hide_dotfile == 'yes' and filename[0] == '.':
                     continue
                 filepath = os.path.join(path, filename)
@@ -154,12 +155,15 @@ class PathView(MethodView):
             res = make_response(page, 200)
             res.set_cookie('hide-dotfile', hide_dotfile, max_age=16070400)
         elif os.path.isfile(path):
+            res = send_file(path)
+            '''
             if 'Range' in request.headers:
                 start, end = get_range(request)
                 res = partial_response(path, start, end)
             else:
                 res = send_file(path)
                 res.headers.add('Content-Disposition', 'attachment')
+            '''
         else:
             res = make_response('Not found', 404)
         return res
